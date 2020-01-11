@@ -22,6 +22,7 @@ into image scaling/viewports
 - Actually fix the logic for the collision testing code, as it produces pixel Y coordinate one 
 too high for images and would cause out of bounds exceptions, so there's just an additional
 check now.
+- Get it working with 
 
 # ScreenShot
 
