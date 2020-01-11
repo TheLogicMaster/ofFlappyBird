@@ -138,10 +138,11 @@ void ofApp::update() {
                 addPipe();
             break;
         case 2: // Gameover screen
-            if (playerRotation < 90)
-                playerRotation += ANGULAR_ACC_DEAD * ofGetLastFrameTime();
-            if (playerPosition < ofGetHeight() - baseImage.getHeight())
+            if (playerPosition < ofGetHeight() - baseImage.getHeight()) {
                 playerVelocity += GRAVITY_ACC * ofGetLastFrameTime();
+                if (playerRotation < 90)
+                    playerRotation += ANGULAR_ACC_DEAD * ofGetLastFrameTime();
+            }
             else
                 playerVelocity = 0;
             break;
