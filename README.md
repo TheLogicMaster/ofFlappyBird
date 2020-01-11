@@ -1,8 +1,8 @@
-#ofFlappyBird
+# ofFlappyBird
 A port of [FlapPyBird](https://github.com/sourabhv/FlapPyBird) using OpenFrameworks. Either use the latest release(linux) or build 
 from source. Currently only tested on linux. 
 
-#Installation
+# Installation
 - Download [OpenFrameworks](https://openframeworks.cc/download/) for your platform and install the dependencies.
 - Clone the repo.
 ```bash
@@ -16,13 +16,13 @@ $ make
 $ make RunRelease
 ```
 
-#Todo
+# Todo
 - Port to android, if I get around to removing the random absolute coordinates and look 
 into image scaling/viewports
 - Actually fix the logic for the collision testing code, as it produces pixel Y coordinate one 
 too high for images and would cause out of bounds exceptions, so there's just an additional
 check now.
 
-#ScreenShot
+# ScreenShot
 
 ![Flappy Bird](screenshot1.png)
