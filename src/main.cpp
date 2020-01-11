@@ -5,6 +5,7 @@
 int main( ){
     ofGLFWWindowSettings settings;
     settings.resizable = false;
+    settings.title = "ofFlappyBird";
     settings.setSize(288, 512);
     ofCreateWindow(settings);
 	ofRunApp( new ofApp());

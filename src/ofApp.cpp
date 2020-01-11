@@ -1,5 +1,12 @@
 #include "ofApp.h"
 
+#ifdef TARGET_LINUX
+
+#include <X11/XKBlib.h>
+#include <X11/Xatom.h>
+
+#endif
+
 void ofApp::setup() {
     ofBackground(255, 255, 255);
 
@@ -49,6 +56,25 @@ void ofApp::setup() {
 
     // Ground mask
     groundMask = getHitmask(baseImage);
+
+    // Change window icon
+#ifdef TARGET_LINUX
+    ofPixels &iconPixels = birdImages[0][0].getPixels();
+    int length = 2 + iconPixels.getWidth() * iconPixels.getHeight();
+    vector<unsigned long> buffer(length);
+    buffer[0] = iconPixels.getWidth();
+    buffer[1] = iconPixels.getHeight();
+    for (size_t i = 0; i < iconPixels.getWidth() * iconPixels.getHeight(); i++) {
+        buffer[i + 2] = iconPixels[i * 4 + 3] << 24;
+        buffer[i + 2] += iconPixels[i * 4 + 0] << 16;
+        buffer[i + 2] += iconPixels[i * 4 + 1] << 8;
+        buffer[i + 2] += iconPixels[i * 4 + 2];
+    }
+    XChangeProperty(ofGetX11Display(), ofGetX11Window(), XInternAtom(ofGetX11Display(), "_NET_WM_ICON", False),
+                    XA_CARDINAL, 32,
+                    PropModeReplace, (const unsigned char *) buffer.data(), length);
+    XFlush(ofGetX11Display());
+#endif
 
     maxBaseShift = backgroundImages[0].getWidth() - baseImage.getWidth();
 
@@ -142,8 +168,7 @@ void ofApp::update() {
                 playerVelocity += GRAVITY_ACC * ofGetLastFrameTime();
                 if (playerRotation < 90)
                     playerRotation += ANGULAR_ACC_DEAD * ofGetLastFrameTime();
-            }
-            else
+            } else
                 playerVelocity = 0;
             break;
         default:
