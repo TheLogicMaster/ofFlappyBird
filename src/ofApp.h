@@ -18,48 +18,56 @@
 #define ANGULAR_ACC_DEAD 170.f // The rotational acceleration while dead
 #define PLAYER_X 80 // The player's horizontal position on the screen
 
-class ofApp : public ofBaseApp{
+class ofApp : public ofBaseApp {
 
-	public:
+public:
 
-        ofImage backgroundImage, baseImage, messageImage, pipeImage, gameoverImage;
-        ofImage numberImages[10];
-        ofImage birdImages[3];
-        ofSoundPlayer wingSound, dieSound, hitSound, pointSound, swooshSound;
-        int gameState;
-        vector<vector<bool>> playerMasks[3];
-		vector<vector<bool>> pipeMaskTop, pipeMaskBottom, groundMask;
-        vector<ofVec2f> pipes;
-        float playerRotation;
-        float playerPosition, playerVelocity;
-        int playerAnimCycle[4] = {0, 1, 2, 1};
-        float playerAnimTime; // Time since
-        int playerAnimFrame; // Animation frame
-        int maxBaseShift;
-        float baseShift;
+    ofImage baseImage, messageImage, gameoverImage;
+    ofImage numberImages[10], pipeImages[2], backgroundImages[2];
+    ofImage birdImages[3][3];
+    ofSoundPlayer wingSound, dieSound, hitSound, pointSound, swooshSound;
+    int gameState;
+    vector<vector<bool>> playerMasks[3];
+    vector<vector<bool>> pipeMaskTop, pipeMaskBottom, groundMask;
+    vector<ofVec2f> pipes;
+    float playerRotation;
+    float playerPosition, playerVelocity;
+    int playerAnimCycle[4] = {0, 1, 2, 1};
+    float playerAnimTime; // Time since
+    int playerAnimFrame; // Animation frame
+    int maxBaseShift;
+    float baseShift;
+    int playerColorIndex, pipeColorIndex, backgroundIndex;
+    int score;
+    bool clicked;
 
-        int score;
-        bool clicked;
+    // Event methods
+    void setup() override;
 
-		void setup() override;
-		void update() override;
-		void draw() override;
-		void keyPressed(int key) override;
-		void keyReleased(int key) override;
-		void mouseMoved(int x, int y ) override;
-		void mouseDragged(int x, int y, int button) override;
-		void mousePressed(int x, int y, int button) override;
-		void mouseReleased(int x, int y, int button) override;
-		void mouseEntered(int x, int y) override;
-		void mouseExited(int x, int y) override;
-		void windowResized(int w, int h) override;
-		void dragEvent(ofDragInfo dragInfo) override;
-		void gotMessage(ofMessage msg) override;
+    void update() override;
 
-		vector<vector<bool>> getHitmask(ofImage image);
-		bool pixelCollision(ofRectangle rect1, ofRectangle rect2, vector<vector<bool>> hitmask1, vector<vector<bool>> hitmask2);
-		void addPipe();
-		void drawScore();
-		void click();
+    void draw() override;
+
+    void keyPressed(int key) override;
+
+    void keyReleased(int key) override;
+
+    void mousePressed(int x, int y, int button) override;
+
+    void mouseReleased(int x, int y, int button) override;
+
+    // Game methods
+    vector<vector<bool>> getHitmask(ofImage image);
+
+    bool
+    pixelCollision(ofRectangle rect1, ofRectangle rect2, vector<vector<bool>> hitmask1, vector<vector<bool>> hitmask2);
+
+    void addPipe();
+
+    void drawScore();
+
+    void click();
+
+    void randomizeColors();
 };
 
