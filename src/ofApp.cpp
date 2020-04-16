@@ -36,6 +36,10 @@ void ofApp::setup() {
         numberImages[i].load(name);
     }
 
+    //Player animations
+    for (int i = 0; i < 3; i++)
+        playerAnimations[i] = Animation(birdImages[i], playerAnimCycle, 3);
+
     // Sounds
     wingSound.load("audio/wing.wav");
     dieSound.load("audio/die.wav");
@@ -45,17 +49,18 @@ void ofApp::setup() {
 
     // Generate player hitmasks
     for (int i = 0; i < 3; i++)
-        playerMasks[i] = getHitmask(birdImages[0][i]);
+        playerMasks[i] = Hitmask(birdImages[0][i]);
 
     // Pipe hitmasks
-    pipeMaskBottom = getHitmask(pipeImages[pipeColorIndex]);
-    pipeMaskTop = getHitmask(pipeImages[pipeColorIndex]);
+    pipeMaskBottom = Hitmask(pipeImages[pipeColorIndex]);
+    pipeMaskTop = Hitmask(pipeImages[pipeColorIndex]);
 
-    for (auto &column: pipeMaskTop)
-        reverse(column.begin(), column.end());
+    //for (auto &column: pipeMaskTop)
+    //    reverse(column.begin(), column.end());
+    pipeMaskTop.verticalFlip();
 
     // Ground mask
-    groundMask = getHitmask(baseImage);
+    groundMask = Hitmask(baseImage);
 
     // Change window icon
 #ifdef TARGET_LINUX
@@ -94,7 +99,7 @@ void ofApp::update() {
         // Animate player
         playerAnimTime += ofGetLastFrameTime();
         if (playerAnimTime > PLAYER_ANIM_LENGTH) {
-            playerAnimFrame = (playerAnimFrame + 1) % 4;
+            playerAnimations[playerColorIndex].increment();
             playerAnimTime = 0;
         }
     }
@@ -106,7 +111,8 @@ void ofApp::update() {
         // Ground
         ofRectangle groundRect = ofRectangle(0, ofGetHeight() - baseImage.getHeight() + 4, ofGetWidth(),
                                              baseImage.getHeight() + 4);
-        if (pixelCollision(playerRect, groundRect, playerMasks[playerAnimFrame], groundMask)) {
+        //pixelCollision(playerRect, groundRect, playerMasks[playerAnimFrame], groundMask)
+        if (playerMasks[playerAnimations[playerColorIndex].getFrame()].checkCollision(playerRect, groundRect, groundMask)) {
             gameState = 2;
             hitSound.play();
         }
@@ -120,8 +126,9 @@ void ofApp::update() {
                                                      pipe.y + PIPE_GAP / 2.f,
                                                      pipeImages[pipeColorIndex].getWidth(),
                                                      pipeImages[pipeColorIndex].getHeight());
-            if (pixelCollision(playerRect, pipeRectBottom, playerMasks[playerAnimFrame], pipeMaskBottom)
-                || pixelCollision(playerRect, pipeRectTop, playerMasks[playerAnimFrame], pipeMaskTop)) {
+            //pixelCollision(playerRect, pipeRectBottom, playerMasks[playerAnimFrame], pipeMaskBottom) || pixelCollision(playerRect, pipeRectTop, playerMasks[playerAnimFrame], pipeMaskTop)
+            if (playerMasks[playerAnimations[playerColorIndex].getFrame()].checkCollision(playerRect, pipeRectBottom, pipeMaskBottom)
+                || playerMasks[playerAnimations[playerColorIndex].getFrame()].checkCollision(playerRect, pipeRectTop, pipeMaskTop)) {
                 gameState = 2;
                 hitSound.play();
                 dieSound.play();
@@ -211,13 +218,7 @@ void ofApp::draw() {
     if (gameState > 0)
         drawScore();
 
-    ofPushMatrix();
-    ofTranslate(PLAYER_X, playerPosition);
-    int bird = playerAnimCycle[playerAnimFrame];
-    birdImages[playerColorIndex][bird].setAnchorPercent(0.5, 0.5);
-    ofRotateDeg(playerRotation);
-    birdImages[playerColorIndex][bird].draw(0, 0);
-    ofPopMatrix();
+    playerAnimations[playerColorIndex].draw(PLAYER_X, playerPosition, playerRotation);
 }
 
 void ofApp::drawScore() {
@@ -227,46 +228,6 @@ void ofApp::drawScore() {
         int num = score > 0 ? (int) (score / pow(10, digits - i - 1)) % 10 : 0;
         numberImages[num].draw(ofGetWidth() / 2.f - digits * width / 2. + i * width, 50);
     }
-}
-
-vector<vector<bool>> ofApp::getHitmask(ofImage image) {
-    ofPixels pixels = image.getPixels();
-    vector<vector<bool>> hitmask = vector<vector<bool>>();
-    for (int x = 0; x < pixels.getWidth(); x++) {
-        vector<bool> column = vector<bool>();
-        for (int y = 0; y < pixels.getHeight(); y++) {
-            //printf("X: %d, Y: %d, R: %d, G: %d, B: %d, A: %d, Hue: %f, Brightness: %f, Saturation: %f\n", x, y, pixels.getColor(x, y).r, pixels.getColor(x, y).g, pixels.getColor(x, y).b, pixels.getColor(x, y).a, pixels.getColor(x, y).getHue(), pixels.getColor(x, y).getBrightness(), pixels.getColor(x, y).getSaturation());
-            column.push_back(pixels.getColor(x, y).a != 0);
-        }
-        hitmask.push_back(column);
-    }
-    return hitmask;
-}
-
-bool ofApp::pixelCollision(ofRectangle rect1, ofRectangle rect2, vector<vector<bool>> hitmask1,
-                           vector<vector<bool>> hitmask2) {
-    ofRectangle rect = rect1.getIntersection(rect2);
-
-    if (rect.width == 0 || rect.height == 0)
-        return false;
-
-    int x1 = rect.x - rect1.x;
-    int y1 = rect.y - rect1.y;
-    int x2 = rect.x - rect2.x;
-    int y2 = rect.y - rect2.y;
-
-    for (int x = 0; x < rect.width; x++)
-        for (int y = 0; y < rect.height; y++) {
-            // Temp fix for out of bounds exception, happens when running into side of pipe
-            if (hitmask1.size() <= x1 + x || hitmask2.size() <= x2 + x || hitmask1.at(x1 + x).size() <= y1 + y ||
-                hitmask2.at(x2 + x).size() <= y2 + y) {
-                continue;
-            }
-            if (hitmask1.at(x1 + x).at(y1 + y) && hitmask2.at(x2 + x).at(y2 + y))
-                return true;
-        }
-
-    return false;
 }
 
 void ofApp::addPipe() {
@@ -308,7 +269,6 @@ void ofApp::click() {
 
             // Might not need
             playerAnimTime = 0;
-            playerAnimFrame = 0;
             baseShift = 0;
 
             addPipe();

@@ -1,6 +1,8 @@
 #pragma once
 
 #include "ofMain.h"
+#include "hitmask.h"
+#include "animation.h"
 
 #define PIPE_VEL -120.f // Speed at which pipes move
 #define PIPE_GAP 100 // Gap between top and bottom pipes
@@ -27,14 +29,14 @@ public:
     ofImage birdImages[3][3];
     ofSoundPlayer wingSound, dieSound, hitSound, pointSound, swooshSound;
     int gameState;
-    vector<vector<bool>> playerMasks[3];
-    vector<vector<bool>> pipeMaskTop, pipeMaskBottom, groundMask;
+    Hitmask playerMasks[3];
+    Hitmask pipeMaskTop, pipeMaskBottom, groundMask;
     vector<ofVec2f> pipes;
     float playerRotation;
     float playerPosition, playerVelocity;
     int playerAnimCycle[4] = {0, 1, 2, 1};
     float playerAnimTime; // Time since
-    int playerAnimFrame; // Animation frame
+    Animation playerAnimations[3];
     int maxBaseShift;
     float baseShift;
     int playerColorIndex, pipeColorIndex, backgroundIndex;
@@ -57,11 +59,6 @@ public:
     void mouseReleased(int x, int y, int button) override;
 
     // Game methods
-    vector<vector<bool>> getHitmask(ofImage image);
-
-    bool
-    pixelCollision(ofRectangle rect1, ofRectangle rect2, vector<vector<bool>> hitmask1, vector<vector<bool>> hitmask2);
-
     void addPipe();
 
     void drawScore();
